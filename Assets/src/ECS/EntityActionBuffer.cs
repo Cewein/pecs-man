@@ -28,13 +28,13 @@ namespace ECS
 		}
 		
 		public void AddComponent<T>(GameObject gameObject, T component)
-			where T: IComponent, new()
+			where T: struct, IComponent
 		{
 			_addedComponentList.Add(gameObject, component);
 		}
 		
 		public void RemoveComponent<T>(GameObject gameObject)
-			where T: IComponent, new()
+			where T: struct, IComponent
 		{
 			_removedComponentList.Add(gameObject, typeof(T));
 		}

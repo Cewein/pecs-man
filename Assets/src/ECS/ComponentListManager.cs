@@ -10,16 +10,16 @@ namespace ECS
 		public static ComponentListManager Instance => _instance ?? (_instance = new ComponentListManager());
 
 		private Dictionary<Type, ComponentList> _componentLists = new Dictionary<Type, ComponentList>();
+
+		public bool InternalUsedBy(GameObject gameObject, Type type)
+		{
+			return _componentLists[type].UsedBy(gameObject);
+		}
 		
 		public T Get<T>(GameObject gameObject)
-			where T: IComponent
+			where T: struct, IComponent
 		{
 			return (T) Get(gameObject, typeof(T));
-		}
-
-		public bool UsedBy<T>(GameObject gameObject)
-		{
-			return _componentLists[typeof(T)].UsedBy(gameObject);
 		}
 		
 		public IComponent Get(GameObject gameObject, Type type)
