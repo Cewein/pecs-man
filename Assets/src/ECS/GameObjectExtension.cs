@@ -6,17 +6,22 @@ namespace ECS
 	{
 		public static bool HasECSComponent<T>(this GameObject gameObject) where T: IComponent, new()
 		{
-			return Accessor<T>.Instance.UsedBy(gameObject);
+			return ComponentListManager.Instance.UsedBy<T>(gameObject);
 		}
 		
 		public static T GetECSComponent<T>(this GameObject gameObject) where T: IComponent, new()
 		{
-			return Accessor<T>.Instance.Get(gameObject);
+			return ComponentListManager.Instance.Get<T>(gameObject);
 		}
 		
-		public static void AddECSComponent<T>(this GameObject gameObject) where T: IComponent, new()
+		public static void BufferedAddECSComponent<T>(this GameObject gameObject, T component) where T: IComponent, new()
 		{
-			Accessor<T>.Instance.Add(gameObject);
+			EntityActionBuffer.Instance.AddComponent(gameObject, component);
+		}
+		
+		public static void BufferedRemoveECSComponent<T>(this GameObject gameObject) where T: IComponent, new()
+		{
+			EntityActionBuffer.Instance.RemoveComponent<T>(gameObject);
 		}
 	}
 }

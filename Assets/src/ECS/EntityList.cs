@@ -19,14 +19,12 @@ namespace ECS
 			
 		}
 
-		public GameObject Create()
+		public void Add(GameObject gameObject)
 		{
-			GameObject gameObject = new GameObject();
 			_entities.Add(gameObject);
-			return gameObject;
 		}
 
-		public void Destroy(GameObject gameObject)
+		public void Remove(GameObject gameObject)
 		{
 			_entities.Remove(gameObject);
 		}
