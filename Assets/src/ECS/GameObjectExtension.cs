@@ -14,9 +14,9 @@ namespace ECS
 			return Accessor<T>.Instance.Get(gameObject);
 		}
 		
-		public static T AddECSComponent<T>(this GameObject gameObject) where T: IComponent, new()
+		public static void AddECSComponent<T>(this GameObject gameObject) where T: IComponent, new()
 		{
-			return Accessor<T>.Instance.Get(gameObject);
+			Accessor<T>.Instance.Add(gameObject);
 		}
 	}
 }
