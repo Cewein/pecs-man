@@ -25,6 +25,11 @@ namespace ECS
 			_entities.Add(gameObject);
 			return gameObject;
 		}
+
+		public void Destroy(GameObject gameObject)
+		{
+			_entities.Remove(gameObject);
+		}
 		
 		public IEnumerator<GameObject> WithComponent<T1>()
 			where T1: IComponent, new()

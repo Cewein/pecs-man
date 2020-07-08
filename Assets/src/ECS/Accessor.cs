@@ -29,5 +29,10 @@ namespace ECS
 		{
 			_components.Add(gameObject, new T());
 		}
+		
+		public void Remove(GameObject gameObject)
+		{
+			_components.Remove(gameObject);
+		}
 	}
 }
