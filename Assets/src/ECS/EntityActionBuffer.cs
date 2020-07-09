@@ -71,7 +71,7 @@ namespace ECS
 			{
                 foreach (IComponent item in pair.Value)
                 {
-				    ComponentListManager.Instance.InternalAdd(pair.Key, item, item.GetType());
+				    ComponentListManager.Instance.InternalAdd(pair.Key, item);
                 }
 			}
             _addedComponentList.Clear();

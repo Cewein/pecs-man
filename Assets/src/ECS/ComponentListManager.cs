@@ -25,21 +25,31 @@ namespace ECS
 			return _componentLists[componentType].ContainsKey(gameObject);
 		}
 		
-		public T Get<T>(GameObject gameObject)
+		public T GetComponent<T>(GameObject gameObject)
 			where T: struct, IComponent
 		{
 			EnsureComponentListExists(typeof(T));
-			return (T) Get(gameObject, typeof(T));
+			return (T) GetComponent(gameObject, typeof(T));
+		}
+
+		public void ApplyComponentChanges(GameObject gameObject, IComponent component)
+		{
+			if (!_componentLists[component.GetType()].ContainsKey(gameObject))
+			{
+				throw new InvalidOperationException("Cannot modify a component who doesn't exists");
+			}
+			InternalAdd(gameObject, component);
 		}
 		
-		public IComponent Get(GameObject gameObject, Type componentType)
+		public IComponent GetComponent(GameObject gameObject, Type componentType)
 		{
 			EnsureComponentListExists(componentType);
 			return _componentLists[componentType][gameObject];
 		}
 		
-		public void InternalAdd(GameObject gameObject, IComponent component, Type componentType)
+		public void InternalAdd(GameObject gameObject, IComponent component)
 		{
+			Type componentType = component.GetType();
 			EnsureComponentListExists(componentType);
 			_componentLists[componentType].Add(gameObject, component);
 		}
