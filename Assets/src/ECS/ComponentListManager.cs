@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using UnityEngine;
 
 namespace ECS
@@ -11,45 +10,56 @@ namespace ECS
 		public static ComponentListManager Instance => _instance ?? (_instance = new ComponentListManager());
 
 		private Dictionary<Type, Dictionary<GameObject, IComponent>> _componentLists = new Dictionary<Type, Dictionary<GameObject, IComponent>>();
+
+		private void EnsureComponentListExists(Type componentType)
+		{
+			if (!_componentLists.ContainsKey(componentType))
+			{
+				_componentLists.Add(componentType, new Dictionary<GameObject, IComponent>());
+			}
+		}
 		
 		public bool HasComponent(GameObject gameObject, Type componentType)
 		{
+			EnsureComponentListExists(componentType);
 			return _componentLists[componentType].ContainsKey(gameObject);
 		}
 		
 		public T Get<T>(GameObject gameObject)
 			where T: struct, IComponent
 		{
+			EnsureComponentListExists(typeof(T));
 			return (T) Get(gameObject, typeof(T));
 		}
 		
-		public IComponent Get(GameObject gameObject, Type type)
+		public IComponent Get(GameObject gameObject, Type componentType)
 		{
-			return _componentLists[type][gameObject];
+			EnsureComponentListExists(componentType);
+			return _componentLists[componentType][gameObject];
 		}
 		
-		public void InternalAdd(GameObject gameObject, IComponent component, Type type)
+		public void InternalAdd(GameObject gameObject, IComponent component, Type componentType)
 		{
-			if (!_componentLists.ContainsKey(type))
-			{
-				_componentLists.Add(type, new Dictionary<GameObject, IComponent>());
-			}
-			_componentLists[type].Add(gameObject, component);
+			EnsureComponentListExists(componentType);
+			_componentLists[componentType].Add(gameObject, component);
 		}
 		
-		public void InternalRemove(GameObject gameObject, Type type)
+		public void InternalRemove(GameObject gameObject, Type componentType)
 		{
-			_componentLists[type].Remove(gameObject);
+			EnsureComponentListExists(componentType);
+			_componentLists[componentType].Remove(gameObject);
 		}
 
 		public int GetComponentCount(Type componentType)
 		{
+			EnsureComponentListExists(componentType);
 			return _componentLists[componentType].Count;
 		}
 
-		public Dictionary<GameObject, IComponent>.KeyCollection GetEntitiesWithComponent(Type type)
+		public Dictionary<GameObject, IComponent>.KeyCollection GetEntitiesWithComponent(Type componentType)
 		{
-			return _componentLists[type].Keys;
+			EnsureComponentListExists(componentType);
+			return _componentLists[componentType].Keys;
 		}
 	}
 }
