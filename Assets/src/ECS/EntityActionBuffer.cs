@@ -69,7 +69,7 @@ namespace ECS
 
 			foreach (KeyValuePair<GameObject, HashSet<IComponent>> pair in _addedComponentList)
 			{
-                foreach (var item in pair.Value)
+                foreach (IComponent item in pair.Value)
                 {
 				    ComponentListManager.Instance.InternalAdd(pair.Key, item, item.GetType());
                 }
@@ -78,7 +78,7 @@ namespace ECS
 			
 			foreach (KeyValuePair<GameObject, HashSet<Type>> pair in _removedComponentList)
 			{
-                foreach (var item in pair.Value) 
+                foreach (Type item in pair.Value) 
                 {
 				    ComponentListManager.Instance.InternalRemove(pair.Key, item);
                 }
