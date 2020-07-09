@@ -24,7 +24,7 @@ namespace Systems
             {
                 //component
                 Module.TargetEdible miam = new Module.TargetEdible();
-                Module.Score score = new Module.Score();
+                Module.Score score = new Module.Score(i, 0, false);
 
                 //entity
                 GameObject tmp = ECS.EntityActionBuffer.Instance.CreateEntity(prefab);
@@ -48,8 +48,49 @@ namespace Systems
                 .With<Module.Score>()
                 .ForEach(obj =>
                 {
-                    if (Vector3.Magnitude(obj.GetComponent<NavMeshAgent>().velocity) <= 0.0001f)
+                    Module.TargetEdible food = obj.GetECSComponent<Module.TargetEdible>();
+                    
+                    float dist = float.MaxValue;
+
+                    new EntityQuery()
+                        .With<Module.Edible>()
+                        .ForEach(pocky =>
+                        {
+                            if (Vector3.Distance(obj.transform.position, pocky.transform.position) < dist)
+                            {
+                                food.target = pocky;
+                                dist = Vector3.Distance(obj.transform.position, pocky.transform.position);
+                            }
+                        });
+
+                    EntityActionBuffer.Instance.ApplyComponentChanges<Module.TargetEdible>(obj, food);
+                    
+
+                    if (Vector3.Distance(obj.transform.position, food.target.transform.position) <= 1.0f)
+                    {
+                        Module.Edible pocky = food.target.GetECSComponent<Module.Edible>();
+                        pocky.active = false;
+                        EntityActionBuffer.Instance.ApplyComponentChanges(food.target, pocky);
+                    }
+
+                    obj.GetComponent<NavMeshAgent>().SetDestination(food.target.transform.position);
+
+                    if (obj.GetECSComponent<Module.Score>().isDead)
+                    {
                         obj.GetComponent<NavMeshAgent>().SetDestination(GameMananger.RandomNavmeshLocation(40f, obj));
+                        obj.transform.position = GameMananger.RandomNavmeshLocation(40f, obj);
+
+                        Module.Score score = obj.GetECSComponent<Module.Score>();
+
+                        MonoBehaviour.print($"{score.number} with score of {score.score}");
+
+                        score.score = 0;
+                        score.isDead = false;
+                        EntityActionBuffer.Instance.ApplyComponentChanges(obj, score);
+
+                    }
+
+
                 });
         }
     };
@@ -147,17 +188,33 @@ namespace Systems
 
                     Module.FollowTarget follow = obj.GetECSComponent<Module.FollowTarget>();
 
-                    new EntityQuery()
-                    .With<Module.Score>()
-                    .ForEach(objToFollow =>
+                    //we pick a new target
+                    if (follow.target == null || follow.target.GetECSComponent<Module.Score>().isDead)
                     {
-                        if(count == following)
+                        new EntityQuery()
+                        .With<Module.Score>()
+                        .ForEach(objToFollow =>
                         {
-                            follow.target = objToFollow;
-                        }
+                            if (count == following)
+                            {
+                                follow.target = objToFollow;
+                            }
 
-                        count++;
-                    });
+                            count++;
+                        });
+                        EntityActionBuffer.Instance.ApplyComponentChanges(obj, follow);
+                    }
+
+                    //We see if the target is dead or not
+                    if(Vector3.Distance(obj.transform.position, follow.target.transform.position) <= 1.0f)
+                    {
+                        Module.Score score = follow.target.GetECSComponent<Module.Score>();
+                        score.isDead = true;
+                        EntityActionBuffer.Instance.ApplyComponentChanges(follow.target, score);
+                    }
+
+                    obj.GetComponent<NavMeshAgent>().SetDestination(follow.target.transform.position);
+
                 });
         }
     };

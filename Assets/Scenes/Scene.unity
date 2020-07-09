@@ -361,12 +361,12 @@ PrefabInstance:
     - target: {fileID: 6734445537907665915, guid: e5aee7605aa69af488f5533073d07fa0,
         type: 3}
       propertyPath: nbPecsMan
-      value: 10
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 6734445537907665915, guid: e5aee7605aa69af488f5533073d07fa0,
         type: 3}
       propertyPath: nbEnemy
-      value: 10
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 6734445537907665915, guid: e5aee7605aa69af488f5533073d07fa0,
         type: 3}
