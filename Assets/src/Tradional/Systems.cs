@@ -71,6 +71,10 @@ namespace Systems
                         Module.Edible pocky = food.target.GetECSComponent<Module.Edible>();
                         pocky.active = false;
                         EntityActionBuffer.Instance.ApplyComponentChanges(food.target, pocky);
+
+                        Module.Score score = obj.GetECSComponent<Module.Score>();
+                        score.score += 1;
+                        EntityActionBuffer.Instance.ApplyComponentChanges(obj, score);
                     }
 
                     obj.GetComponent<NavMeshAgent>().SetDestination(food.target.transform.position);
