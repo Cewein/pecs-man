@@ -43,13 +43,14 @@ namespace Systems
 
         public override void Update()
         {
-            EntityQuery entityQuery = new EntityQuery();
-            entityQuery = entityQuery.WithComponent<Module.TargetEdible>().WithComponent<Module.Score>();
-            entityQuery.ForEach(obj =>
-            {
-                if(Vector3.Magnitude(obj.GetComponent<NavMeshAgent>().velocity) <= 0.0001f)
-                    obj.GetComponent<NavMeshAgent>().SetDestination(GameMananger.RandomNavmeshLocation(40f, obj));
-            });
+            new EntityQuery()
+                .With<Module.TargetEdible>()
+                .With<Module.Score>()
+                .ForEach(obj => 
+                {
+                    if(Vector3.Magnitude(obj.GetComponent<NavMeshAgent>().velocity) <= 0.0001f)
+                        obj.GetComponent<NavMeshAgent>().SetDestination(GameMananger.RandomNavmeshLocation(40f, obj));
+                });
         }
     };
 
