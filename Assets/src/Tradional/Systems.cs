@@ -66,7 +66,7 @@ namespace Systems
                     EntityActionBuffer.Instance.ApplyComponentChanges<Module.TargetEdible>(obj, food);
                     
 
-                    if (Vector3.Distance(obj.transform.position, food.target.transform.position) <= 1.0f)
+                    if (Vector3.Distance(obj.transform.position, food.target.transform.position) <= 1.2f)
                     {
                         Module.Edible pocky = food.target.GetECSComponent<Module.Edible>();
                         pocky.active = false;
@@ -81,12 +81,12 @@ namespace Systems
 
                     if (obj.GetECSComponent<Module.Score>().isDead)
                     {
-                        obj.GetComponent<NavMeshAgent>().SetDestination(GameMananger.RandomNavmeshLocation(40f, obj));
                         obj.transform.position = GameMananger.RandomNavmeshLocation(40f, obj);
+                        obj.GetComponent<TrailRenderer>().Clear();
 
                         Module.Score score = obj.GetECSComponent<Module.Score>();
 
-                        MonoBehaviour.print($"{score.number} with score of {score.score}");
+                        MonoBehaviour.print($"pecsman N°{score.number} with score of {score.score}");
 
                         score.score = 0;
                         score.isDead = false;
