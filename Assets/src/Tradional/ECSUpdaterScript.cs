@@ -3,11 +3,6 @@ using UnityEngine;
 
 public class ECSUpdaterScript : MonoBehaviour
 {
-    private void Awake()
-    {
-        ECSSystem.ScanForEnabledSystems();
-    }
-    
     private void Start()
     {
         ECSSystem.StartAll();

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
+﻿using System.Collections.Generic;
 
 namespace ECS
 {
@@ -8,19 +6,9 @@ namespace ECS
 	{
 		private static List<ECSSystem> _systems = new List<ECSSystem>();
 
-		public static void ScanForEnabledSystems()
+		public static void AddSystem(ECSSystem system)
 		{
-			foreach(Type type in Assembly.GetExecutingAssembly().GetTypes())
-			{
-				if (type.GetCustomAttributes(typeof(EnableECSSystemAttribute), false).Length > 0)
-				{
-					if (!type.IsSubclassOf(typeof(ECSSystem)))
-					{
-						throw new InvalidOperationException($"Class {type} does not inherits from ECSSystem");
-					}
-					_systems.Add((ECSSystem)Activator.CreateInstance(type));
-				}
-			}
+			_systems.Add(system);
 		}
 		
 		public static void StartAll()
