@@ -34,11 +34,14 @@ namespace ECS
 
 		public void ApplyComponentChanges(GameObject gameObject, IComponent component)
 		{
+			Type componentType = component.GetType();
+			EnsureComponentListExists(componentType);
 			if (!_componentLists[component.GetType()].ContainsKey(gameObject))
 			{
 				throw new InvalidOperationException("Cannot modify a component who doesn't exists");
 			}
-			InternalAdd(gameObject, component);
+
+			_componentLists[componentType][gameObject] = component;
 		}
 		
 		public IComponent GetComponent(GameObject gameObject, Type componentType)
