@@ -12,8 +12,8 @@ namespace ECS
 		private List<GameObject> _createdEntityList = new List<GameObject>();
 		private List<GameObject> _removedEntityList = new List<GameObject>();
 
-		private Dictionary<GameObject, IComponent> _addedComponentList = new Dictionary<GameObject, IComponent>();
-		private Dictionary<GameObject, Type> _removedComponentList = new Dictionary<GameObject, Type>();
+		private Dictionary<GameObject, HashSet<IComponent>> _addedComponentList = new Dictionary<GameObject, HashSet<IComponent>>();
+		private Dictionary<GameObject, HashSet<Type>> _removedComponentList = new Dictionary<GameObject, HashSet<Type>>();
 
 		public GameObject CreateEntity()
 		{
@@ -21,8 +21,15 @@ namespace ECS
 			_createdEntityList.Add(gameObject);
 			return gameObject;
 		}
-		
-		public void RemoveEntity(GameObject gameObject)
+
+        public GameObject CreateEntity(GameObject prefab)
+        {
+            GameObject gameObject = UnityEngine.Object.Instantiate(prefab);
+            _createdEntityList.Add(gameObject);
+            return gameObject;
+        }
+
+        public void RemoveEntity(GameObject gameObject)
 		{
 			_removedEntityList.Add(gameObject);
 		}
@@ -30,13 +37,19 @@ namespace ECS
 		public void AddComponent<T>(GameObject gameObject, T component)
 			where T: struct, IComponent
 		{
-			_addedComponentList.Add(gameObject, component);
+            if(!_addedComponentList.ContainsKey(gameObject))
+                _addedComponentList.Add(gameObject, new HashSet<IComponent>());
+
+            _addedComponentList[gameObject].Add(component);
 		}
 		
 		public void RemoveComponent<T>(GameObject gameObject)
 			where T: struct, IComponent
 		{
-			_removedComponentList.Add(gameObject, typeof(T));
+            if (!_removedComponentList.ContainsKey(gameObject))
+                _removedComponentList.Add(gameObject, new HashSet<Type>());
+
+            _removedComponentList[gameObject].Add(typeof(T));
 		}
 		
 		// ReSharper disable ForCanBeConvertedToForeach
@@ -54,17 +67,23 @@ namespace ECS
 			}
 			_removedEntityList.Clear();
 
-			foreach (KeyValuePair<GameObject,IComponent> pair in _addedComponentList)
+			foreach (KeyValuePair<GameObject, HashSet<IComponent>> pair in _addedComponentList)
 			{
-				ComponentListManager.Instance.InternalAdd(pair.Key, pair.Value, pair.Value.GetType());
+                foreach (var item in pair.Value)
+                {
+				    ComponentListManager.Instance.InternalAdd(pair.Key, item, item.GetType());
+                }
 			}
-			_createdEntityList.Clear();
+            _addedComponentList.Clear();
 			
-			foreach (KeyValuePair<GameObject, Type> pair in _removedComponentList)
+			foreach (KeyValuePair<GameObject, HashSet<Type>> pair in _removedComponentList)
 			{
-				ComponentListManager.Instance.InternalRemove(pair.Key, pair.Value);
+                foreach (var item in pair.Value) 
+                {
+				    ComponentListManager.Instance.InternalRemove(pair.Key, item);
+                }
 			}
-			_removedEntityList.Clear();
+            _removedComponentList.Clear();
 		}
 	}
 }

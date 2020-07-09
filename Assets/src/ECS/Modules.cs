@@ -12,11 +12,13 @@ namespace Module
     public struct FollowTarget : ECS.IComponent
     {
         GameObject target;
+        float speed;
     }
 
     public struct TargetEdible : ECS.IComponent
     {
         GameObject target;
+        float speed;
     }
 
     public struct Score : ECS.IComponent

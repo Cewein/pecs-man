@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class GameMananger : MonoBehaviour
 {
@@ -12,10 +13,71 @@ public class GameMananger : MonoBehaviour
     public GameObject Food;
     public GameObject Enemy;
 
-    // Start is called before the first frame update
+    void CreatePecsMan()
+    {
+        for (int i = 0; i < nbPecsMan; i++)
+        {
+            //component
+            Module.TargetEdible miam = new Module.TargetEdible();
+            Module.Score score = new Module.Score();
+
+            //entity
+            GameObject tmp = ECS.EntityActionBuffer.Instance.CreateEntity(PecsMan);
+
+            //merging both
+            ECS.EntityActionBuffer.Instance.AddComponent(tmp, miam);
+            ECS.EntityActionBuffer.Instance.AddComponent(tmp, score);
+        }
+    }
+
+    void CreateFood()
+    {
+        for (int i = 0; i < nbFoods; i++)
+        {
+            //component
+            Module.Edible edible = new Module.Edible();
+
+            //entity
+            GameObject tmp = ECS.EntityActionBuffer.Instance.CreateEntity(Food);
+
+            //merging both
+            ECS.EntityActionBuffer.Instance.AddComponent(tmp, edible);
+        }
+    }
+
+    void CreateEnemy()
+    {
+        for (int i = 0; i <nbEnemy; i++)
+        {
+            //component
+            Module.FollowTarget follow = new Module.FollowTarget();
+
+            //entity
+            GameObject tmp = ECS.EntityActionBuffer.Instance.CreateEntity(Enemy);
+
+            //merging both
+            ECS.EntityActionBuffer.Instance.AddComponent(tmp, follow);
+        }
+    }
+
+    public Vector3 RandomNavmeshLocation(float radius)
+    {
+        Vector3 randomDirection = Random.insideUnitSphere * radius;
+        randomDirection += transform.position;
+        NavMeshHit hit;
+        Vector3 finalPosition = Vector3.zero;
+        if (NavMesh.SamplePosition(randomDirection, out hit, radius, 1))
+        {
+            finalPosition = hit.position;
+        }
+        return finalPosition;
+    }
+
     void Start()
     {
-        
+        CreatePecsMan();
+        CreateFood();
+        CreateEnemy();
     }
 
     // Update is called once per frame
