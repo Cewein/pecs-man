@@ -23,6 +23,7 @@ public class GameMananger : MonoBehaviour
 
             //entity
             GameObject tmp = ECS.EntityActionBuffer.Instance.CreateEntity(PecsMan);
+            tmp.transform.position = RandomNavmeshLocation(40, tmp);
 
             //merging both
             ECS.EntityActionBuffer.Instance.AddComponent(tmp, miam);
@@ -39,6 +40,7 @@ public class GameMananger : MonoBehaviour
 
             //entity
             GameObject tmp = ECS.EntityActionBuffer.Instance.CreateEntity(Food);
+            tmp.transform.position = RandomNavmeshLocation(40, tmp);
 
             //merging both
             ECS.EntityActionBuffer.Instance.AddComponent(tmp, edible);
@@ -54,16 +56,17 @@ public class GameMananger : MonoBehaviour
 
             //entity
             GameObject tmp = ECS.EntityActionBuffer.Instance.CreateEntity(Enemy);
+            tmp.transform.position = RandomNavmeshLocation(40, tmp);
 
             //merging both
             ECS.EntityActionBuffer.Instance.AddComponent(tmp, follow);
         }
     }
 
-    public Vector3 RandomNavmeshLocation(float radius)
+    public static Vector3 RandomNavmeshLocation(float radius, GameObject entity)
     {
         Vector3 randomDirection = Random.insideUnitSphere * radius;
-        randomDirection += transform.position;
+        randomDirection += entity.transform.position;
         NavMeshHit hit;
         Vector3 finalPosition = Vector3.zero;
         if (NavMesh.SamplePosition(randomDirection, out hit, radius, 1))
