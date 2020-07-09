@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using UnityEngine;
 
 namespace ECS
@@ -9,11 +10,11 @@ namespace ECS
 		private static ComponentListManager _instance;
 		public static ComponentListManager Instance => _instance ?? (_instance = new ComponentListManager());
 
-		private Dictionary<Type, ComponentList> _componentLists = new Dictionary<Type, ComponentList>();
-
-		public bool InternalUsedBy(GameObject gameObject, Type type)
+		private Dictionary<Type, Dictionary<GameObject, IComponent>> _componentLists = new Dictionary<Type, Dictionary<GameObject, IComponent>>();
+		
+		public bool HasComponent(GameObject gameObject, Type componentType)
 		{
-			return _componentLists[type].UsedBy(gameObject);
+			return _componentLists[componentType].ContainsKey(gameObject);
 		}
 		
 		public T Get<T>(GameObject gameObject)
@@ -24,46 +25,31 @@ namespace ECS
 		
 		public IComponent Get(GameObject gameObject, Type type)
 		{
-			return _componentLists[type].GetComponent(gameObject);
+			return _componentLists[type][gameObject];
 		}
 		
 		public void InternalAdd(GameObject gameObject, IComponent component, Type type)
 		{
 			if (!_componentLists.ContainsKey(type))
 			{
-				_componentLists.Add(type, new ComponentList());
+				_componentLists.Add(type, new Dictionary<GameObject, IComponent>());
 			}
-			_componentLists[type].AddComponent(gameObject, component);
+			_componentLists[type].Add(gameObject, component);
 		}
 		
 		public void InternalRemove(GameObject gameObject, Type type)
 		{
-			_componentLists[type].RemoveComponent(gameObject);
+			_componentLists[type].Remove(gameObject);
 		}
-		
-		private class ComponentList
+
+		public int GetComponentCount(Type componentType)
 		{
-			private Dictionary<GameObject, IComponent> _components = new Dictionary<GameObject, IComponent>();
+			return _componentLists[componentType].Count;
+		}
 
-			public bool UsedBy(GameObject gameObject)
-			{
-				return _components.ContainsKey(gameObject);
-			}
-
-			public IComponent GetComponent(GameObject gameObject)
-			{
-				return _components[gameObject];
-			}
-
-			public void AddComponent(GameObject gameObject, IComponent component)
-			{
-				_components.Add(gameObject, component);
-			}
-		
-			public void RemoveComponent(GameObject gameObject)
-			{
-				_components.Remove(gameObject);
-			}
+		public Dictionary<GameObject, IComponent>.KeyCollection GetEntitiesWithComponent(Type type)
+		{
+			return _componentLists[type].Keys;
 		}
 	}
 }

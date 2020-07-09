@@ -57,13 +57,13 @@ namespace ECS
 		{
 			for (int i = 0; i < _createdEntityList.Count; i++)
 			{
-				EntityList.Instance.Add(_createdEntityList[i]);
+				EntityList.Instance.InternalAdd(_createdEntityList[i]);
 			}
 			_createdEntityList.Clear();
 			
 			for (int i = 0; i < _removedEntityList.Count; i++)
 			{
-				EntityList.Instance.Remove(_removedEntityList[i]);
+				EntityList.Instance.InternalRemove(_removedEntityList[i]);
 			}
 			_removedEntityList.Clear();
 

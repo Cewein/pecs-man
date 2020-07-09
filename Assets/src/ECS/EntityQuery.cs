@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using UnityEngine;
 
 namespace ECS
@@ -16,22 +17,42 @@ namespace ECS
 
 		public void ForEach(Action<GameObject> action)
 		{
-			EntityList list = EntityList.Instance;
-			for (int i = 0; i < list.EntityCount; i++)
+			if (_neededComponents.Count < 1)
 			{
-				bool gameObjectIsValid = true;
-				for (int j = 0; j < _neededComponents.Count; j++)
+				throw new InvalidOperationException("Cannot make an entity query without any component constraint");
+			}
+			
+			//We check every components to retrieve the one with the least instances. This will allows us to possibly iterate over fewer entities.
+			int lowestSize = ComponentListManager.Instance.GetComponentCount(_neededComponents[0]);
+			int lowestIndex = 0;
+			for (int i = 1; i < _neededComponents.Count; i++)
+			{
+				int currSize = ComponentListManager.Instance.GetComponentCount(_neededComponents[i]);
+				if (currSize < lowestSize)
 				{
-					if (!ComponentListManager.Instance.InternalUsedBy(list[i], _neededComponents[j]))
+					lowestIndex = i;
+				}
+			}
+			Type componentTypeWithLeastInstances = _neededComponents[lowestIndex];
+			
+			//We retrieve the entities with the component type retrieved above
+			Dictionary<GameObject, IComponent>.KeyCollection entitiesWithComponent = ComponentListManager.Instance.GetEntitiesWithComponent(componentTypeWithLeastInstances);
+			foreach (GameObject entity in entitiesWithComponent)
+			{
+				//We check if the entities also have other needed components
+				bool entityIsValid = true;
+				foreach (Type type in _neededComponents)
+				{
+					if (type != componentTypeWithLeastInstances && !ComponentListManager.Instance.HasComponent(entity, type))
 					{
-						gameObjectIsValid = false;
+						entityIsValid = false;
 						break;
 					}
 				}
 
-				if (gameObjectIsValid)
+				if (entityIsValid)
 				{
-					action.Invoke(list[i]);
+					action.Invoke(entity);
 				}
 			}
 		}

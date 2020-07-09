@@ -19,12 +19,12 @@ namespace ECS
 			
 		}
 
-		public void Add(GameObject gameObject)
+		public void InternalAdd(GameObject gameObject)
 		{
 			_entities.Add(gameObject);
 		}
 
-		public void Remove(GameObject gameObject)
+		public void InternalRemove(GameObject gameObject)
 		{
 			_entities.Remove(gameObject);
 		}
