@@ -11,6 +11,10 @@ public class GameMananger : MonoBehaviour
     public int nbFoods;
     public int nbEnemy;
 
+    public static int globalnbPecsMan;
+    public static int globalnbFoods;
+    public static int globalnbEnemy;
+
     public GameObject PecsMan;
     public GameObject Food;
     public GameObject Enemy;
@@ -33,6 +37,10 @@ public class GameMananger : MonoBehaviour
         ECSSystem.AddSystem(new PecsManSystem(PecsMan, nbPecsMan));
         ECSSystem.AddSystem(new FoodSystem(Food, nbFoods));
         ECSSystem.AddSystem(new EnemySystem(Enemy, nbEnemy));
+
+        globalnbEnemy = nbEnemy;
+        globalnbFoods = nbFoods;
+        globalnbPecsMan = nbPecsMan;
     }
 
     // Update is called once per frame

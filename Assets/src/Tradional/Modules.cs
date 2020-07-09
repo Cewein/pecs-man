@@ -6,23 +6,23 @@ namespace Module
 {
     public struct Edible : ECS.IComponent
     {
-        bool active;
+        public bool active;
     }
 
     public struct FollowTarget : ECS.IComponent
     {
-        GameObject target;
-        float speed;
+        public GameObject target;
+        public float speed;
     }
 
     public struct TargetEdible : ECS.IComponent
     {
-        GameObject target;
-        float speed;
+        public GameObject target;
+        public float speed;
     }
 
     public struct Score : ECS.IComponent
     {
-        int score;
+        public int score;
     }
 }

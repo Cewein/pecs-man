@@ -10,7 +10,7 @@ namespace Systems
     class PecsManSystem : ECS.ECSSystem
     {
         private GameObject prefab;
-        private int number;
+        public int number;
 
         public PecsManSystem(GameObject prefab, int number)
         {
@@ -46,9 +46,9 @@ namespace Systems
             new EntityQuery()
                 .With<Module.TargetEdible>()
                 .With<Module.Score>()
-                .ForEach(obj => 
+                .ForEach(obj =>
                 {
-                    if(Vector3.Magnitude(obj.GetComponent<NavMeshAgent>().velocity) <= 0.0001f)
+                    if (Vector3.Magnitude(obj.GetComponent<NavMeshAgent>().velocity) <= 0.0001f)
                         obj.GetComponent<NavMeshAgent>().SetDestination(GameMananger.RandomNavmeshLocation(40f, obj));
                 });
         }
@@ -85,6 +85,22 @@ namespace Systems
         {
             Create();
         }
+
+        public override void Update()
+        {
+            new EntityQuery()
+                .With<Module.Edible>()
+                .ForEach(obj =>
+                {
+                    Module.Edible edible = obj.GetECSComponent<Module.Edible>();
+                    if (!edible.active)
+                    {
+                        obj.transform.position = GameMananger.RandomNavmeshLocation(40f, obj);
+                        edible.active = true;
+                        ComponentListManager.Instance.ApplyComponentChanges(obj, edible);
+                    }
+                });
+        }
     };
 
     class EnemySystem : ECS.ECSSystem
@@ -118,6 +134,24 @@ namespace Systems
         {
             Create();
         }
+
+        //public override void Update()
+        //{
+        //    new EntityQuery()
+        //        .With<Module.Edible>()
+        //        .ForEach(obj =>
+        //        {
+
+        //            int following = UnityEngine.Random.Range(0, )
+
+        //            Module.Edible edible = obj.GetECSComponent<Module.Edible>();
+        //            if (!edible.active)
+        //            {
+        //                obj.transform.position = GameMananger.RandomNavmeshLocation(40f, obj);
+        //                edible.active = true;
+        //            }
+        //        });
+        //}
     };
 
 
