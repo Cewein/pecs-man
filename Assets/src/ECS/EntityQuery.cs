@@ -9,7 +9,7 @@ namespace ECS
 	{
 		private List<Type> _neededComponents = new List<Type>();
 		
-		public EntityQuery WithComponent<T>()
+		public EntityQuery With<T>()
 		{
 			_neededComponents.Add(typeof(T));
 			return this;
@@ -50,6 +50,7 @@ namespace ECS
 					}
 				}
 
+				//If the entity corresponds to the required components
 				if (entityIsValid)
 				{
 					action.Invoke(entity);
