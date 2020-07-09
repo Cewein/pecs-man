@@ -135,23 +135,31 @@ namespace Systems
             Create();
         }
 
-        //public override void Update()
-        //{
-        //    new EntityQuery()
-        //        .With<Module.Edible>()
-        //        .ForEach(obj =>
-        //        {
+        public override void Update()
+        {
+            new EntityQuery()
+                .With<Module.FollowTarget>()
+                .ForEach(obj =>
+                {
 
-        //            int following = UnityEngine.Random.Range(0, )
+                    int following = UnityEngine.Random.Range(0, GameMananger.globalnbPecsMan);
+                    int count = 0;
 
-        //            Module.Edible edible = obj.GetECSComponent<Module.Edible>();
-        //            if (!edible.active)
-        //            {
-        //                obj.transform.position = GameMananger.RandomNavmeshLocation(40f, obj);
-        //                edible.active = true;
-        //            }
-        //        });
-        //}
+                    Module.FollowTarget follow = obj.GetECSComponent<Module.FollowTarget>();
+
+                    new EntityQuery()
+                    .With<Module.Score>()
+                    .ForEach(objToFollow =>
+                    {
+                        if(count == following)
+                        {
+                            follow.target = objToFollow;
+                        }
+
+                        count++;
+                    });
+                });
+        }
     };
 
 
