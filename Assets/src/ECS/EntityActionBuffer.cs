@@ -13,6 +13,7 @@ namespace ECS
 		private List<GameObject> _removedEntityList = new List<GameObject>();
 
 		private Dictionary<GameObject, HashSet<IComponent>> _addedComponentList = new Dictionary<GameObject, HashSet<IComponent>>();
+		private Dictionary<GameObject, HashSet<IComponent>> _modifiedComponentList = new Dictionary<GameObject, HashSet<IComponent>>();
 		private Dictionary<GameObject, HashSet<Type>> _removedComponentList = new Dictionary<GameObject, HashSet<Type>>();
 
 		public GameObject CreateEntity()
@@ -41,6 +42,15 @@ namespace ECS
                 _addedComponentList.Add(gameObject, new HashSet<IComponent>());
 
             _addedComponentList[gameObject].Add(component);
+		}
+		
+		public void ApplyComponentChanges<T>(GameObject gameObject, T component)
+			where T: struct, IComponent
+		{
+            if(!_modifiedComponentList.ContainsKey(gameObject))
+	            _modifiedComponentList.Add(gameObject, new HashSet<IComponent>());
+
+            _modifiedComponentList[gameObject].Add(component);
 		}
 		
 		public void RemoveComponent<T>(GameObject gameObject)
@@ -75,6 +85,15 @@ namespace ECS
                 }
 			}
             _addedComponentList.Clear();
+
+            foreach (KeyValuePair<GameObject, HashSet<IComponent>> pair in _modifiedComponentList)
+            {
+	            foreach (IComponent item in pair.Value)
+	            {
+		            ComponentListManager.Instance.InternalApplyComponentChanges(pair.Key, item);
+	            }
+            }
+            _modifiedComponentList.Clear();
 			
 			foreach (KeyValuePair<GameObject, HashSet<Type>> pair in _removedComponentList)
 			{

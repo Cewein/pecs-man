@@ -97,7 +97,7 @@ namespace Systems
                     {
                         obj.transform.position = GameMananger.RandomNavmeshLocation(40f, obj);
                         edible.active = true;
-                        ComponentListManager.Instance.ApplyComponentChanges(obj, edible);
+                        EntityActionBuffer.Instance.ApplyComponentChanges(obj, edible);
                     }
                 });
         }

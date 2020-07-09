@@ -32,7 +32,7 @@ namespace ECS
 			return (T) GetComponent(gameObject, typeof(T));
 		}
 
-		public void ApplyComponentChanges(GameObject gameObject, IComponent component)
+		public void InternalApplyComponentChanges(GameObject gameObject, IComponent component)
 		{
 			Type componentType = component.GetType();
 			EnsureComponentListExists(componentType);
