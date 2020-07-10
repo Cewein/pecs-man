@@ -1,19 +1,13 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.AI;
-using Systems;
 using ECS;
+using Tradional.Systems;
 
 public class GameMananger : MonoBehaviour
 {
     public int nbPecsMan;
     public int nbFoods;
     public int nbEnemy;
-
-    public static int globalnbPecsMan;
-    public static int globalnbFoods;
-    public static int globalnbEnemy;
 
     public GameObject PecsMan;
     public GameObject Food;
@@ -23,30 +17,19 @@ public class GameMananger : MonoBehaviour
     {
         Vector3 randomDirection = Random.insideUnitSphere * radius;
         randomDirection += entity.transform.position;
-        NavMeshHit hit;
         Vector3 finalPosition = Vector3.zero;
-        if (NavMesh.SamplePosition(randomDirection, out hit, radius, 1))
+        if (NavMesh.SamplePosition(randomDirection, out NavMeshHit hit, radius, 1))
         {
             finalPosition = hit.position;
         }
         return finalPosition;
     }
 
-    void Awake()
+    private void Awake()
     {
         ECSSystem.AddSystem(new PecsManSystem(PecsMan, nbPecsMan));
         ECSSystem.AddSystem(new FoodSystem(Food, nbFoods));
         ECSSystem.AddSystem(new EnemySystem(Enemy, nbEnemy));
-
-        globalnbEnemy = nbEnemy;
-        globalnbFoods = nbFoods;
-        globalnbPecsMan = nbPecsMan;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }
 
