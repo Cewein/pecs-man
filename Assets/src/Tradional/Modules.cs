@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,6 +13,13 @@ namespace Module
     public struct FollowTarget : ECS.IComponent
     {
         public GameObject target;
+        public bool asBeenCalmDown;
+
+        public FollowTarget(GameObject target, bool asBeenCalmDown)
+        {
+            this.target = target;
+            this.asBeenCalmDown = asBeenCalmDown;
+        }
     }
 
     public struct TargetEdible : ECS.IComponent
@@ -30,6 +38,18 @@ namespace Module
             this.number = number;
             this.score = score;
             this.isDead = isDead;
+        }
+    }
+
+    public struct Vendetta : ECS.IComponent
+    {
+        public bool wantToDoVandetta;
+        public GameObject target;
+
+        public Vendetta(bool wantToDoVandetta, GameObject target)
+        {
+            this.wantToDoVandetta = wantToDoVandetta;
+            this.target = target;
         }
     }
 }
