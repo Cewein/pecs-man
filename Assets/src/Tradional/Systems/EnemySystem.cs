@@ -1,7 +1,9 @@
 ﻿using ECS;
 using Module.Components;
 using UnityEngine;
-using UnityEngine.AI;
+using MeshRenderer = Module.Components.MeshRenderer;
+using TrailRenderer = Module.Components.TrailRenderer;
+using NavMeshAgent = Module.Components.NavMeshAgent;
 
 namespace Tradional.Systems
 {
@@ -20,15 +22,21 @@ namespace Tradional.Systems
         {
             for (int i = 0; i < _number; i++)
             {
-                //component
-                FollowTarget follow = new FollowTarget(null,false);
-
                 //entity
                 GameObject tmp = EntityActionBuffer.Instance.CreateEntity(_prefab);
                 tmp.transform.position = GameMananger.RandomNavmeshLocation(400, tmp);
+                
+                //component
+                FollowTarget follow = new FollowTarget(null,false);
+                TrailRenderer trailRenderer = new TrailRenderer(tmp);
+                MeshRenderer meshRenderer = new MeshRenderer(tmp);
+                NavMeshAgent navMeshAgent = new NavMeshAgent(tmp);
 
                 //merging both
                 EntityActionBuffer.Instance.AddComponent(tmp, follow);
+                EntityActionBuffer.Instance.AddComponent(tmp, trailRenderer);
+                EntityActionBuffer.Instance.AddComponent(tmp, meshRenderer);
+                EntityActionBuffer.Instance.AddComponent(tmp, navMeshAgent);
             }
         }
 
@@ -49,7 +57,7 @@ namespace Tradional.Systems
                     if (follow.HasBeenCalmDown)
                     {
                         obj.transform.position = GameMananger.RandomNavmeshLocation(400f, obj);
-                        obj.GetComponent<TrailRenderer>().Clear();
+                        obj.GetECSComponent<TrailRenderer>().UnityComponent.Clear();
 
                         follow.HasBeenCalmDown = false;
 
@@ -63,7 +71,7 @@ namespace Tradional.Systems
                     KillTarget(obj, follow);
 
                     if(follow.Target != null)
-                        obj.GetComponent<NavMeshAgent>().SetDestination(follow.Target.transform.position);
+                        obj.GetECSComponent<NavMeshAgent>().UnityComponent.SetDestination(follow.Target.transform.position);
 
                 });
         }
@@ -110,9 +118,9 @@ namespace Tradional.Systems
                 vendetta.WantToDoVendetta = true;
                 vendetta.Target = obj;
 
-                follow.Target.GetComponent<MeshRenderer>().material.color = Color.magenta;
-                follow.Target.GetComponent<TrailRenderer>().material.color = Color.magenta;
-                follow.Target.GetComponent<NavMeshAgent>().speed = 10.0f;
+                follow.Target.GetECSComponent<MeshRenderer>().UnityComponent.material.color = Color.magenta;
+                follow.Target.GetECSComponent<TrailRenderer>().UnityComponent.material.color = Color.magenta;
+                follow.Target.GetECSComponent<NavMeshAgent>().UnityComponent.speed = 10.0f;
 
                 EntityActionBuffer.Instance.ApplyComponentChanges(follow.Target, vendetta);
             }

@@ -1,7 +1,9 @@
 ﻿using ECS;
 using Module.Components;
 using UnityEngine;
-using UnityEngine.AI;
+using MeshRenderer = Module.Components.MeshRenderer;
+using TrailRenderer = Module.Components.TrailRenderer;
+using NavMeshAgent = Module.Components.NavMeshAgent;
 
 namespace Tradional.Systems
 {
@@ -20,19 +22,25 @@ namespace Tradional.Systems
         {
             for (int i = 0; i < _number; i++)
             {
+                //entity
+                GameObject tmp = EntityActionBuffer.Instance.CreateEntity(_prefab);
+                tmp.transform.position = GameMananger.RandomNavmeshLocation(40f, tmp);
+                
                 //component
                 TargetEdible miam = new TargetEdible();
                 Score score = new Score(i, 0, false);
                 Vendetta vendetta = new Vendetta(false, null);
-
-                //entity
-                GameObject tmp = EntityActionBuffer.Instance.CreateEntity(_prefab);
-                tmp.transform.position = GameMananger.RandomNavmeshLocation(40f, tmp);
+                TrailRenderer trailRenderer = new TrailRenderer(tmp);
+                MeshRenderer meshRenderer = new MeshRenderer(tmp);
+                NavMeshAgent navMeshAgent = new NavMeshAgent(tmp);
 
                 //merging both
                 EntityActionBuffer.Instance.AddComponent(tmp, miam);
                 EntityActionBuffer.Instance.AddComponent(tmp, score);
                 EntityActionBuffer.Instance.AddComponent(tmp, vendetta);
+                EntityActionBuffer.Instance.AddComponent(tmp, trailRenderer);
+                EntityActionBuffer.Instance.AddComponent(tmp, meshRenderer);
+                EntityActionBuffer.Instance.AddComponent(tmp, navMeshAgent);
             }
         }
 
@@ -64,14 +72,14 @@ namespace Tradional.Systems
                         EatFood(obj, food);
 
                         if(food.Target != null)
-                            obj.GetComponent<NavMeshAgent>().SetDestination(food.Target.transform.position);                   
+                            obj.GetECSComponent<NavMeshAgent>().UnityComponent.SetDestination(food.Target.transform.position);                   
                     }
                     else
                     {
                         //in vendetta state so now just want to kill is killer nothing else
                         if(!vendetta.Target.GetECSComponent<FollowTarget>().HasBeenCalmDown)
                         {
-                            obj.GetComponent<NavMeshAgent>().SetDestination(vendetta.Target.transform.position);
+                            obj.GetECSComponent<NavMeshAgent>().UnityComponent.SetDestination(vendetta.Target.transform.position);
 
                             if (Vector3.Distance(obj.transform.position, vendetta.Target.transform.position) <= 1.2f)
                             {
@@ -84,9 +92,9 @@ namespace Tradional.Systems
                         else
                         {
                             vendetta.WantToDoVendetta = false;
-                            obj.GetComponent<MeshRenderer>().material.color = Color.green;
-                            obj.GetComponent<TrailRenderer>().material.color = Color.green;
-                            obj.GetComponent<NavMeshAgent>().speed = 4.5f;
+                            obj.GetECSComponent<MeshRenderer>().UnityComponent.material.color = Color.green;
+                            obj.GetECSComponent<TrailRenderer>().UnityComponent.material.color = Color.green;
+                            obj.GetECSComponent<NavMeshAgent>().UnityComponent.speed = 4.5f;
                             EntityActionBuffer.Instance.ApplyComponentChanges(obj, vendetta);
                             
                         }
@@ -113,7 +121,7 @@ namespace Tradional.Systems
             if (obj.GetECSComponent<Score>().IsDead)
             {
                 obj.transform.position = GameMananger.RandomNavmeshLocation(40f, obj);
-                obj.GetComponent<TrailRenderer>().Clear();
+                obj.GetECSComponent<TrailRenderer>().UnityComponent.Clear();
 
                 Score score = obj.GetECSComponent<Score>();
 
