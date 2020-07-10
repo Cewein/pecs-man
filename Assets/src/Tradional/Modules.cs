@@ -43,12 +43,12 @@ namespace Module
 
     public struct Vendetta : ECS.IComponent
     {
-        public bool wantToDoVandetta;
+        public bool wantToDoVendetta;
         public GameObject target;
 
-        public Vendetta(bool wantToDoVandetta, GameObject target)
+        public Vendetta(bool wantToDoVendetta, GameObject target)
         {
-            this.wantToDoVandetta = wantToDoVandetta;
+            this.wantToDoVendetta = wantToDoVendetta;
             this.target = target;
         }
     }

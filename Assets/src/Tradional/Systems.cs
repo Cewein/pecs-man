@@ -54,38 +54,14 @@ namespace Systems
                     Module.Vendetta vendetta = obj.GetECSComponent<Module.Vendetta>();
 
                     //pecsman death
-                    if (obj.GetECSComponent<Module.Score>().isDead)
-                    {
-                        obj.transform.position = GameMananger.RandomNavmeshLocation(40f, obj);
-                        obj.GetComponent<TrailRenderer>().Clear();
-
-                        Module.Score score = obj.GetECSComponent<Module.Score>();
-
-                        MonoBehaviour.print($"pecsman N°{score.number} with score of {score.score}");
-
-                        score.score = 0;
-                        score.isDead = false;
-                        EntityActionBuffer.Instance.ApplyComponentChanges(obj, score);
-                    }
+                    Death(obj);
 
                     //normal behavior is not in vendetta state
-                    if (!vendetta.wantToDoVandetta)
+                    if (!vendetta.wantToDoVendetta)
                     {
                         Module.TargetEdible food = obj.GetECSComponent<Module.TargetEdible>();
 
-                        //pick closest food source
-                        float dist = float.MaxValue;
-                        new EntityQuery()
-                            .With<Module.Edible>()
-                            .ForEach(pocky =>
-                            {
-                                if (Vector3.Distance(obj.transform.position, pocky.transform.position) < dist)
-                                {
-                                    food.target = pocky;
-                                    dist = Vector3.Distance(obj.transform.position, pocky.transform.position);
-                                }
-                            });
-                        EntityActionBuffer.Instance.ApplyComponentChanges<Module.TargetEdible>(obj, food);
+                        pickClosestFood(obj, food);
 
                         EatFood(obj, food);
 
@@ -108,9 +84,12 @@ namespace Systems
                         }
                         else
                         {
-                            vendetta.wantToDoVandetta = false;
+                            vendetta.wantToDoVendetta = false;
                             obj.GetComponent<MeshRenderer>().material.color = Color.green;
+                            obj.GetComponent<TrailRenderer>().material.color = Color.green;
+                            obj.GetComponent<NavMeshAgent>().speed = 4.5f;
                             EntityActionBuffer.Instance.ApplyComponentChanges(obj, vendetta);
+                            
                         }
                     }
                 });
@@ -131,6 +110,59 @@ namespace Systems
                 score.score += 1;
                 EntityActionBuffer.Instance.ApplyComponentChanges(obj, score);
             }
+        }
+
+        private void Death(GameObject obj)
+        {
+            if (obj.GetECSComponent<Module.Score>().isDead)
+            {
+                obj.transform.position = GameMananger.RandomNavmeshLocation(40f, obj);
+                obj.GetComponent<TrailRenderer>().Clear();
+
+                Module.Score score = obj.GetECSComponent<Module.Score>();
+
+                MonoBehaviour.print($"pecsman N°{score.number} with score of {score.score}");
+
+                score.score = 0;
+                score.isDead = false;
+                EntityActionBuffer.Instance.ApplyComponentChanges(obj, score);
+            }
+        }
+
+        private void pickClosestFood(GameObject obj, Module.TargetEdible food)
+        {
+            float dist = float.MaxValue;
+            new EntityQuery()
+                .With<Module.Edible>()
+                .ForEach(pocky =>
+                {
+                    if (Vector3.Distance(obj.transform.position, pocky.transform.position) < dist)
+                    {
+                        food.target = pocky;
+                        dist = Vector3.Distance(obj.transform.position, pocky.transform.position);
+                    }
+                });
+            EntityActionBuffer.Instance.ApplyComponentChanges<Module.TargetEdible>(obj, food);
+        }
+
+        private bool pickClosestEnemyInRange(GameObject obj, Module.Vendetta vendetta, float range)
+        {
+            float dist = range;
+            new EntityQuery()
+                .With<Module.FollowTarget>()
+                .ForEach(enemy =>
+                {
+                    if (Vector3.Distance(obj.transform.position, enemy.transform.position) < dist)
+                    {
+                        vendetta.target = enemy;
+                        dist = Vector3.Distance(obj.transform.position, enemy.transform.position);
+                    }
+                });
+            EntityActionBuffer.Instance.ApplyComponentChanges<Module.Vendetta>(obj, vendetta);
+
+            if (dist == range)
+                return false;
+            return true;
         }
     };
 
@@ -204,7 +236,7 @@ namespace Systems
 
                 //entity
                 GameObject tmp = ECS.EntityActionBuffer.Instance.CreateEntity(prefab);
-                tmp.transform.position = GameMananger.RandomNavmeshLocation(40, tmp);
+                tmp.transform.position = GameMananger.RandomNavmeshLocation(400, tmp);
 
                 //merging both
                 ECS.EntityActionBuffer.Instance.AddComponent(tmp, follow);
@@ -230,7 +262,7 @@ namespace Systems
                     //calming down the enemy
                     if (follow.asBeenCalmDown)
                     {
-                        obj.transform.position = GameMananger.RandomNavmeshLocation(40f, obj);
+                        obj.transform.position = GameMananger.RandomNavmeshLocation(400f, obj);
                         obj.GetComponent<TrailRenderer>().Clear();
 
                         follow.asBeenCalmDown = false;
@@ -239,47 +271,64 @@ namespace Systems
                     }
 
                     //we pick a new target
-                    if (follow.target == null || follow.target.GetECSComponent<Module.Score>().isDead || follow.target.GetECSComponent<Module.Vendetta>().wantToDoVandetta)
-                    {
-                        new EntityQuery()
-                        .With<Module.Score>()
-                        .With<Module.Vendetta>()
-                        .ForEach(objToFollow =>
-                        {
-                            //only pick green pecsman
-                            Module.Vendetta vendetta = objToFollow.GetECSComponent<Module.Vendetta>();
-                            if (count == following)
-                            {
-                                follow.target = objToFollow;
-                            }
-
-                            count++;
-                        });
-                        EntityActionBuffer.Instance.ApplyComponentChanges(obj, follow);
-                    }
+                    pickNewTarget(obj, follow);
 
                     //We see if the target is dead or not
-                    if(Vector3.Distance(obj.transform.position, follow.target.transform.position) <= 1.0f)
-                    {
-                        EntityActionBuffer.Instance.ApplyComponentChanges(obj, follow);
-
-                        Module.Score score = follow.target.GetECSComponent<Module.Score>();
-                        score.isDead = true;
-                        EntityActionBuffer.Instance.ApplyComponentChanges(follow.target, score);
-
-                        //we kill set the target of the dead pecsman to the killer
-                        Module.Vendetta vendetta = follow.target.GetECSComponent<Module.Vendetta>();
-                        vendetta.wantToDoVandetta = true;
-                        vendetta.target = obj;
-
-                        follow.target.GetComponent<MeshRenderer>().material.color = Color.magenta;
-
-                        EntityActionBuffer.Instance.ApplyComponentChanges(follow.target, vendetta);
-                    }
+                    KillTarget(obj, follow);
 
                     obj.GetComponent<NavMeshAgent>().SetDestination(follow.target.transform.position);
 
                 });
+        }
+
+        private void pickNewTarget(GameObject obj, Module.FollowTarget follow)
+        {
+            //only pick new target once or if the new target want to do a Vendetta
+            //it will chase it down until he is dead
+            if (follow.target == null || follow.target.GetECSComponent<Module.Vendetta>().wantToDoVendetta)
+            {
+                float dist = float.MaxValue;
+                new EntityQuery()
+                .With<Module.Score>()
+                .With<Module.Vendetta>()
+                .ForEach(objToFollow =>
+                {
+                    //only pick green pecsman
+                    Module.Vendetta vendetta = objToFollow.GetECSComponent<Module.Vendetta>();
+                    if (!vendetta.wantToDoVendetta)
+                    {
+                        if (Vector3.Distance(obj.transform.position, objToFollow.transform.position) < dist)
+                        {
+                            follow.target = objToFollow;
+                            dist = Vector3.Distance(obj.transform.position, objToFollow.transform.position);
+                        }
+                    }
+                });
+                EntityActionBuffer.Instance.ApplyComponentChanges(obj, follow);
+            }
+        }
+
+        private void KillTarget(GameObject obj, Module.FollowTarget follow)
+        {
+            if (Vector3.Distance(obj.transform.position, follow.target.transform.position) <= 1.0f)
+            {
+                EntityActionBuffer.Instance.ApplyComponentChanges(obj, follow);
+
+                Module.Score score = follow.target.GetECSComponent<Module.Score>();
+                score.isDead = true;
+                EntityActionBuffer.Instance.ApplyComponentChanges(follow.target, score);
+
+                //we set the target of the dead pecsman to the killer
+                Module.Vendetta vendetta = follow.target.GetECSComponent<Module.Vendetta>();
+                vendetta.wantToDoVendetta = true;
+                vendetta.target = obj;
+
+                follow.target.GetComponent<MeshRenderer>().material.color = Color.magenta;
+                follow.target.GetComponent<TrailRenderer>().material.color = Color.magenta;
+                follow.target.GetComponent<NavMeshAgent>().speed = 10.0f;
+
+                EntityActionBuffer.Instance.ApplyComponentChanges(follow.target, vendetta);
+            }
         }
     };
 }
