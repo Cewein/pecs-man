@@ -1,6 +1,5 @@
-﻿using System;
-using ECS;
-using Module;
+﻿using ECS;
+using Module.Components;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -47,12 +46,12 @@ namespace Tradional.Systems
                     FollowTarget follow = obj.GetECSComponent<FollowTarget>();
 
                     //calming down the enemy
-                    if (follow.asBeenCalmDown)
+                    if (follow.HasBeenCalmDown)
                     {
                         obj.transform.position = GameMananger.RandomNavmeshLocation(400f, obj);
                         obj.GetComponent<TrailRenderer>().Clear();
 
-                        follow.asBeenCalmDown = false;
+                        follow.HasBeenCalmDown = false;
 
                         EntityActionBuffer.Instance.ApplyComponentChanges(obj, follow);
                     }
@@ -63,8 +62,8 @@ namespace Tradional.Systems
                     //We see if the target is dead or not
                     KillTarget(obj, follow);
 
-                    if(follow.target != null)
-                        obj.GetComponent<NavMeshAgent>().SetDestination(follow.target.transform.position);
+                    if(follow.Target != null)
+                        obj.GetComponent<NavMeshAgent>().SetDestination(follow.Target.transform.position);
 
                 });
         }
@@ -73,7 +72,7 @@ namespace Tradional.Systems
         {
             //only pick new target once or if the new target want to do a Vendetta
             //it will chase it down until he is dead
-            if (follow.target == null || follow.target.GetECSComponent<Vendetta>().wantToDoVendetta)
+            if (follow.Target == null || follow.Target.GetECSComponent<Vendetta>().WantToDoVendetta)
             {
                 float dist = float.MaxValue;
                 new EntityQuery()
@@ -83,11 +82,11 @@ namespace Tradional.Systems
                 {
                     //only pick green pecsman
                     Vendetta vendetta = objToFollow.GetECSComponent<Vendetta>();
-                    if (!vendetta.wantToDoVendetta)
+                    if (!vendetta.WantToDoVendetta)
                     {
                         if (Vector3.Distance(obj.transform.position, objToFollow.transform.position) < dist)
                         {
-                            follow.target = objToFollow;
+                            follow.Target = objToFollow;
                             dist = Vector3.Distance(obj.transform.position, objToFollow.transform.position);
                         }
                     }
@@ -98,24 +97,24 @@ namespace Tradional.Systems
 
         private void KillTarget(GameObject obj, FollowTarget follow)
         {
-            if (follow.target != null && Vector3.Distance(obj.transform.position, follow.target.transform.position) <= 1.0f)
+            if (follow.Target != null && Vector3.Distance(obj.transform.position, follow.Target.transform.position) <= 1.0f)
             {
                 EntityActionBuffer.Instance.ApplyComponentChanges(obj, follow);
 
-                Score score = follow.target.GetECSComponent<Score>();
-                score.isDead = true;
-                EntityActionBuffer.Instance.ApplyComponentChanges(follow.target, score);
+                Score score = follow.Target.GetECSComponent<Score>();
+                score.IsDead = true;
+                EntityActionBuffer.Instance.ApplyComponentChanges(follow.Target, score);
 
                 //we set the target of the dead pecsman to the killer
-                Vendetta vendetta = follow.target.GetECSComponent<Vendetta>();
-                vendetta.wantToDoVendetta = true;
-                vendetta.target = obj;
+                Vendetta vendetta = follow.Target.GetECSComponent<Vendetta>();
+                vendetta.WantToDoVendetta = true;
+                vendetta.Target = obj;
 
-                follow.target.GetComponent<MeshRenderer>().material.color = Color.magenta;
-                follow.target.GetComponent<TrailRenderer>().material.color = Color.magenta;
-                follow.target.GetComponent<NavMeshAgent>().speed = 10.0f;
+                follow.Target.GetComponent<MeshRenderer>().material.color = Color.magenta;
+                follow.Target.GetComponent<TrailRenderer>().material.color = Color.magenta;
+                follow.Target.GetComponent<NavMeshAgent>().speed = 10.0f;
 
-                EntityActionBuffer.Instance.ApplyComponentChanges(follow.target, vendetta);
+                EntityActionBuffer.Instance.ApplyComponentChanges(follow.Target, vendetta);
             }
         }
     }

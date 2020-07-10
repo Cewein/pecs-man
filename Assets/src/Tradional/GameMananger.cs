@@ -1,7 +1,7 @@
-﻿using UnityEngine;
-using UnityEngine.AI;
-using ECS;
+﻿using ECS;
 using Tradional.Systems;
+using UnityEngine;
+using UnityEngine.AI;
 
 public class GameMananger : MonoBehaviour
 {

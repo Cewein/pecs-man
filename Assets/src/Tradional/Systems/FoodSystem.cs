@@ -1,6 +1,5 @@
-﻿using System;
-using ECS;
-using Module;
+﻿using ECS;
+using Module.Components;
 using UnityEngine;
 
 namespace Tradional.Systems
@@ -45,10 +44,10 @@ namespace Tradional.Systems
                 {
                     //check if food as been eaten
                     Edible edible = obj.GetECSComponent<Edible>();
-                    if (!edible.active)
+                    if (!edible.Active)
                     {
                         obj.transform.position = GameMananger.RandomNavmeshLocation(40f, obj);
-                        edible.active = true;
+                        edible.Active = true;
                         EntityActionBuffer.Instance.ApplyComponentChanges(obj, edible);
                     }
                 });

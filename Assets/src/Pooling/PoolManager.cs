@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,7 +8,7 @@ public enum ObjectType
     Ennemy
 }
 
-[System.Serializable]
+[Serializable]
 public struct ObjectForPoll
 {
     public ObjectType objectType;

@@ -1,5 +1,5 @@
 ﻿using ECS;
-using Module;
+using Module.Components;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -55,7 +55,7 @@ namespace Tradional.Systems
                     Death(obj);
 
                     //normal behavior is not in vendetta state
-                    if (!vendetta.wantToDoVendetta)
+                    if (!vendetta.WantToDoVendetta)
                     {
                         TargetEdible food = obj.GetECSComponent<TargetEdible>();
 
@@ -63,27 +63,27 @@ namespace Tradional.Systems
 
                         EatFood(obj, food);
 
-                        if(food.target != null)
-                            obj.GetComponent<NavMeshAgent>().SetDestination(food.target.transform.position);                   
+                        if(food.Target != null)
+                            obj.GetComponent<NavMeshAgent>().SetDestination(food.Target.transform.position);                   
                     }
                     else
                     {
                         //in vendetta state so now just want to kill is killer nothing else
-                        if(!vendetta.target.GetECSComponent<FollowTarget>().asBeenCalmDown)
+                        if(!vendetta.Target.GetECSComponent<FollowTarget>().HasBeenCalmDown)
                         {
-                            obj.GetComponent<NavMeshAgent>().SetDestination(vendetta.target.transform.position);
+                            obj.GetComponent<NavMeshAgent>().SetDestination(vendetta.Target.transform.position);
 
-                            if (Vector3.Distance(obj.transform.position, vendetta.target.transform.position) <= 1.2f)
+                            if (Vector3.Distance(obj.transform.position, vendetta.Target.transform.position) <= 1.2f)
                             {
-                                FollowTarget traget = vendetta.target.GetECSComponent<FollowTarget>();
-                                traget.asBeenCalmDown = true;
-                                EntityActionBuffer.Instance.ApplyComponentChanges(vendetta.target, traget);
+                                FollowTarget traget = vendetta.Target.GetECSComponent<FollowTarget>();
+                                traget.HasBeenCalmDown = true;
+                                EntityActionBuffer.Instance.ApplyComponentChanges(vendetta.Target, traget);
                             }
 
                         }
                         else
                         {
-                            vendetta.wantToDoVendetta = false;
+                            vendetta.WantToDoVendetta = false;
                             obj.GetComponent<MeshRenderer>().material.color = Color.green;
                             obj.GetComponent<TrailRenderer>().material.color = Color.green;
                             obj.GetComponent<NavMeshAgent>().speed = 4.5f;
@@ -96,31 +96,31 @@ namespace Tradional.Systems
 
         private void EatFood(GameObject obj, TargetEdible food)
         {
-            if (food.target != null && Vector3.Distance(obj.transform.position, food.target.transform.position) <= 1.2f)
+            if (food.Target != null && Vector3.Distance(obj.transform.position, food.Target.transform.position) <= 1.2f)
             {
-                Edible pocky = food.target.GetECSComponent<Edible>();
-                pocky.active = false;
-                EntityActionBuffer.Instance.ApplyComponentChanges(food.target, pocky);
+                Edible pocky = food.Target.GetECSComponent<Edible>();
+                pocky.Active = false;
+                EntityActionBuffer.Instance.ApplyComponentChanges(food.Target, pocky);
 
                 Score score = obj.GetECSComponent<Score>();
-                score.score += 1;
+                score.Value += 1;
                 EntityActionBuffer.Instance.ApplyComponentChanges(obj, score);
             }
         }
 
         private void Death(GameObject obj)
         {
-            if (obj.GetECSComponent<Score>().isDead)
+            if (obj.GetECSComponent<Score>().IsDead)
             {
                 obj.transform.position = GameMananger.RandomNavmeshLocation(40f, obj);
                 obj.GetComponent<TrailRenderer>().Clear();
 
                 Score score = obj.GetECSComponent<Score>();
 
-                MonoBehaviour.print($"pecsman N°{score.number} with score of {score.score}");
+                MonoBehaviour.print($"pecsman N°{score.Id} with score of {score.Value}");
 
-                score.score = 0;
-                score.isDead = false;
+                score.Value = 0;
+                score.IsDead = false;
                 EntityActionBuffer.Instance.ApplyComponentChanges(obj, score);
             }
         }
@@ -134,7 +134,7 @@ namespace Tradional.Systems
                 {
                     if (Vector3.Distance(obj.transform.position, pocky.transform.position) < dist)
                     {
-                        food.target = pocky;
+                        food.Target = pocky;
                         dist = Vector3.Distance(obj.transform.position, pocky.transform.position);
                     }
                 });

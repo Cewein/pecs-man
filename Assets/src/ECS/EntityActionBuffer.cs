@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace ECS
 {
@@ -25,7 +26,7 @@ namespace ECS
 
         public GameObject CreateEntity(GameObject prefab)
         {
-            GameObject gameObject = UnityEngine.Object.Instantiate(prefab);
+            GameObject gameObject = Object.Instantiate(prefab);
             _createdEntityList.Add(gameObject);
             return gameObject;
         }
