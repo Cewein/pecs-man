@@ -65,7 +65,8 @@ namespace Systems
 
                         EatFood(obj, food);
 
-                        obj.GetComponent<NavMeshAgent>().SetDestination(food.target.transform.position);                   
+                        if(food.target != null)
+                            obj.GetComponent<NavMeshAgent>().SetDestination(food.target.transform.position);                   
                     }
                     else
                     {
@@ -100,7 +101,7 @@ namespace Systems
 
         private void EatFood(GameObject obj, Module.TargetEdible food)
         {
-            if (Vector3.Distance(obj.transform.position, food.target.transform.position) <= 1.2f)
+            if (food.target != null && Vector3.Distance(obj.transform.position, food.target.transform.position) <= 1.2f)
             {
                 Module.Edible pocky = food.target.GetECSComponent<Module.Edible>();
                 pocky.active = false;
@@ -256,7 +257,6 @@ namespace Systems
                 {
 
                     int following = UnityEngine.Random.Range(0, GameMananger.globalnbPecsMan);
-                    int count = 0;
                     Module.FollowTarget follow = obj.GetECSComponent<Module.FollowTarget>();
 
                     //calming down the enemy
@@ -276,7 +276,8 @@ namespace Systems
                     //We see if the target is dead or not
                     KillTarget(obj, follow);
 
-                    obj.GetComponent<NavMeshAgent>().SetDestination(follow.target.transform.position);
+                    if(follow.target != null)
+                        obj.GetComponent<NavMeshAgent>().SetDestination(follow.target.transform.position);
 
                 });
         }
@@ -310,7 +311,7 @@ namespace Systems
 
         private void KillTarget(GameObject obj, Module.FollowTarget follow)
         {
-            if (Vector3.Distance(obj.transform.position, follow.target.transform.position) <= 1.0f)
+            if (follow.target != null && Vector3.Distance(obj.transform.position, follow.target.transform.position) <= 1.0f)
             {
                 EntityActionBuffer.Instance.ApplyComponentChanges(obj, follow);
 
